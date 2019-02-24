@@ -6,9 +6,6 @@ from time import sleep
 import pickle
 import pprint
 
-# termination criteria
-criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
-
 args = sys.argv
 cap = cv2.VideoCapture(1)
 
@@ -23,7 +20,7 @@ objp = np.zeros((cols*rows, 3), np.float32)
 objp[:, :2] = np.mgrid[0:rows, 0:cols].T.reshape(-1, 2)
 
 objpoints = [] # 3d points in real world space
-imgpoints = [] # ed points in image plane
+imgpoints = [] # 2d points in image plane
 
 result_matrix = {}
 
@@ -36,13 +33,12 @@ while True:
 
     frame = cv2.resize(frame, (int(frame.shape[1]/2), int(frame.shape[0]/2)))
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    ret, corners_temp = cv2.findCirclesGrid(gray, (cols, rows), flags=cv2.CALIB_CB_ASYMMETRIC_GRID)
+    ret, corners = cv2.findCirclesGrid(gray, (cols, rows), flags=cv2.CALIB_CB_ASYMMETRIC_GRID)
 
     # success find chessboard
     if ret:
         objpoints.append(objp)
 
-        corners = cv2.cornerSubPix(gray,corners_temp,(11,11),(-1,-1),criteria)
         imgpoints.append(corners)
 
         frame = cv2.drawChessboardCorners(frame, (cols, rows), corners, ret)
