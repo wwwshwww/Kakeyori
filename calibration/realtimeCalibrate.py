@@ -25,7 +25,7 @@ imgpoints = [] # 2d points in image plane
 result_matrix = {}
 
 count = 0
-COUNT_MAX = 5
+COUNT_MAX = 50
 
 while True:
     re, frame = cap.read()
@@ -47,7 +47,7 @@ while True:
         count += 1
 
     cv2.imshow('image', frame)
-    sleep(0.5)
+    sleep(0.3)
 
     if count > COUNT_MAX:
         ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1],None,None)
