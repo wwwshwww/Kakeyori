@@ -4,7 +4,7 @@ aruco = cv2.aruco
 dictionary = aruco.getPredefinedDictionary(aruco.DICT_6X6_250)
 
 def arReader():
-    cap = cv2.VideoCapture(1) # start VideoCapture
+    cap = cv2.VideoCapture(0) # start VideoCapture
 
     while True:
         ret, frame = cap.read() 
