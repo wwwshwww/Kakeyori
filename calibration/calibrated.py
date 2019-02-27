@@ -21,7 +21,7 @@ def getCameraMatrix():
 def calibration(image, cam_mtx, mode=0):
     h, w = image.shape[:2]
     newcameramtx, roi = cv2.getOptimalNewCameraMatrix(cam_mtx['mtx'], cam_mtx['dist'], (w,h), mode, (w,h))
-    mapx, mapy = cv2.cv2.initUndistortRectifyMap(cam_mtx['mtx'], cam_mtx['dist'], None, newcameramtx, (w,h), 5)
+    mapx, mapy = cv2.initUndistortRectifyMap(cam_mtx['mtx'], cam_mtx['dist'], None, newcameramtx, (w,h), 5)
     dst = cv2.remap(image, mapx, mapy, cv2.INTER_LINEAR)
 
     x, y, w, h = roi
