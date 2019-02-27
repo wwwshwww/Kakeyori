@@ -1,15 +1,19 @@
 import cv2
+from calibration import calibrated
 
 aruco = cv2.aruco
 dictionary = aruco.getPredefinedDictionary(aruco.DICT_6X6_250)
 
+cam_mtx = calibrated.getCameraMatrix()
+
 def arReader():
-    cap = cv2.VideoCapture(0) # start VideoCapture
+    cap = cv2.VideoCapture(1) # start VideoCapture
 
     while True:
         ret, frame = cap.read() 
 
-        frame = cv2.resize(frame, (int(frame.shape[1]/2), int(frame.shape[0]/2)))
+        # frame = cv2.resize(frame, (int(frame.shape[1]/2), int(frame.shape[0]/2)))
+        frame = calibrated.calibration(frame, cam_mtx)
 
         corners, ids, rejectedImgPoints = aruco.detectMarkers(frame, dictionary)
         frame = aruco.drawDetectedMarkers(frame, corners, ids)
@@ -18,17 +22,17 @@ def arReader():
         font = cv2.FONT_HERSHEY_PLAIN
         index = 0;
         for c in corners:
-          mid = ids[index]
-          x = 0.0;
-          y = 0.0;
-          for xy in c:
-            x += xy[0][0]
-            y += xy[0][1]
-          x = x / 4
-          y = y / 4
-          index += 1;
+            mid = ids[index]
+            x = 0.0;
+            y = 0.0;
+            for xy in c:
+                x += xy[0][0]
+                y += xy[0][1]
+            x = x / 4
+            y = y / 4
+            index += 1;
 
-          print('[' + str(mid) + '] x: ' + str(x) + ' y: ' + str(y))
+            print('[' + str(mid) + '] x: ' + str(x) + ' y: ' + str(y))
         #.putText(frame, corners, (frame.shape[1]/2, frame.shape[0]/2), font, 0.6, (255,255,0))
 
         cv2.imshow('Edited frame', frame)
