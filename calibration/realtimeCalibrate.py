@@ -25,14 +25,15 @@ imgpoints = [] # 2d points in image plane
 result_matrix = {}
 
 count = 0
-COUNT_MAX = 50
+COUNT_MAX = 3
 
 while True:
     re, frame = cap.read()
 
     # frame = cv2.resize(frame, (int(frame.shape[1]/2), int(frame.shape[0]/2)))
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    ret, corners = cv2.findCirclesGrid(gray, (cols, rows), flags=cv2.CALIB_CB_ASYMMETRIC_GRID)
+    ret, corners = cv2.findChessboardCorners(gray, (cols, rows), None)
+    # ret, corners = cv2.findCirclesGrid(gray, (cols, rows), flags=cv2.CALIB_CB_ASYMMETRIC_GRID)
 
     # success find chessboard
     if ret:
@@ -47,7 +48,7 @@ while True:
         count += 1
 
     cv2.imshow('image', frame)
-    sleep(0.3)
+    sleep(0.4)
 
     if count > COUNT_MAX:
         ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1],None,None)
@@ -61,6 +62,14 @@ while True:
         output = open('calibration/camera_matrix', 'wb')
         pickle.dump(result_matrix, output)
         output.close
+
+        mean_error = 0
+        for i in range(len(objpoints)):
+            imgpoints2, _ = cv2.projectPoints(objpoints[i], rvecs[i], tvecs[i], mtx, dist)
+            error = cv2.norm(imgpoints[i],imgpoints2, cv2.NORM_L2)/len(imgpoints2)
+            mean_error += error
+
+        print(mean_error/len(objpoints))
         break
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
