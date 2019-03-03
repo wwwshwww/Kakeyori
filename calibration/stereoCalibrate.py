@@ -15,8 +15,7 @@ rows = 8
 objp = np.zeros((rows*cols, 3), np.float32)
 objp[:, :2] = np.mgrid[0:cols, 0:rows].T.reshape(-1, 2)
 
-objpoints1 = []
-objpoints2 = []
+objpoints = []
 imgpoints1 = []
 imgpoints2 = []
 
@@ -52,13 +51,12 @@ while True:
     ret2, corners2 = getCorners(frame2)
 
     if ret1 and ret2:
-        objpoints1.append(objp)
-        objpoints2.append(objp)
+        objpoints.append(objp)
         imgpoints1.append(corners1)
         imgpoints2.append(corners2)
 
         frame1 = cv2.drawChessboardCorners(frame1, (cols, rows), corners1, ret)
-        frame2 = cv2.drawChessboardCorners(frame2, (cols, rows), corners1, ret)
+        frame2 = cv2.drawChessboardCorners(frame2, (cols, rows), corners2, ret)
 
         print(count)
         count += 1
@@ -68,8 +66,8 @@ while True:
     sleep(0.4)
 
     if count > MAX:
-        result1 = getCalibrationDict(objpoints1, imgpoints1, frame1.shape[::-1])
-        result2 = getCalibrationDict(objpoints2, imgpoints2, frame2.shape[::-1])
+        result1 = getCalibrationDict(objpoints, imgpoints1, frame1.shape[::-1])
+        result2 = getCalibrationDict(objpoints, imgpoints2, frame2.shape[::-1])
 
         pprint(result1)
         pprint(result2)
@@ -77,6 +75,14 @@ while True:
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
+
+ret, frame = cap1.read()
+
+ret, mtx1, dist1, mtx2, dist2, r, t, e, f = 
+        cv2.stereoCalibrate(objpoints, imgpoints1, imgpoints2, frame.shape[::-1],
+        result1['mtx'], result1['dist'], result2['mtx'], result2['dist'])
+
+print(mtx1, mtx2)
 
 cap.release()
 cv2.destroyAllWindows()
