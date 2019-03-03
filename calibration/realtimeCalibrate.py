@@ -31,8 +31,8 @@ while True:
     re, frame = cap.read()
 
     # frame = cv2.resize(frame, (int(frame.shape[1]/2), int(frame.shape[0]/2)))
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    ret, corners = cv2.findChessboardCorners(gray, (cols, rows), None)
+    flg = cv2.CALIB_CB_ADAPTIVE_THRESH + cv2.CALIB_CB_FILTER_QUADS + cv2.CALIB_CB_FAST_CHECK
+    ret, corners = cv2.findChessboardCorners(gray, (cols, rows), flags=flg)
     # ret, corners = cv2.findCirclesGrid(gray, (cols, rows), flags=cv2.CALIB_CB_ASYMMETRIC_GRID)
 
     # success find chessboard
