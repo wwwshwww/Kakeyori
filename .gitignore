@@ -1,3 +1,4 @@
 .DS_Store
 calibration/camera_matrix
+calibration/__pycache__
 test
