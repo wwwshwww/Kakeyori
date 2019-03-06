@@ -34,7 +34,7 @@ def getCorners(img):
     return ret, corners
 
 def getCalibrationDict(objp, imgp, size):
-    ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objp, imgp, size, None,None)
+    ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objp, imgp, size, None, None)
     result = {}
     result['ret'] = ret
     result['mtx'] = mtx
@@ -47,6 +47,9 @@ while True:
     ret1, frame1 = cap1.read()
     ret2, frame2 = cap2.read()
 
+    gray1 = cv2.cvtColor(frame1, cv2.COLOR_BGR2GRAY)
+    gray2 = cv2.cvtColor(frame2, cv2.COLOR_BGR2GRAY)
+
     ret1, corners1 = getCorners(frame1)
     ret2, corners2 = getCorners(frame2)
 
@@ -55,8 +58,8 @@ while True:
         imgpoints1.append(corners1)
         imgpoints2.append(corners2)
 
-        frame1 = cv2.drawChessboardCorners(frame1, (cols, rows), corners1, ret)
-        frame2 = cv2.drawChessboardCorners(frame2, (cols, rows), corners2, ret)
+        frame1 = cv2.drawChessboardCorners(frame1, (cols, rows), corners1, ret1)
+        frame2 = cv2.drawChessboardCorners(frame2, (cols, rows), corners2, ret2)
 
         print(count)
         count += 1
@@ -66,23 +69,23 @@ while True:
     sleep(0.4)
 
     if count > MAX:
-        result1 = getCalibrationDict(objpoints, imgpoints1, frame1.shape[::-1])
-        result2 = getCalibrationDict(objpoints, imgpoints2, frame2.shape[::-1])
+        result1 = getCalibrationDict(objpoints, imgpoints1, gray1.shape[::-1])
+        result2 = getCalibrationDict(objpoints, imgpoints2, gray2.shape[::-1])
 
-        pprint(result1)
-        pprint(result2)
+        pprint.pprint(result1)
+        pprint.pprint(result2)
         break
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
 ret, frame = cap1.read()
+gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-ret, mtx1, dist1, mtx2, dist2, r, t, e, f = 
-        cv2.stereoCalibrate(objpoints, imgpoints1, imgpoints2, frame.shape[::-1],
-        result1['mtx'], result1['dist'], result2['mtx'], result2['dist'])
+ret, mtx1, dist1, mtx2, dist2, r, t, e, f = cv2.stereoCalibrate(objpoints, imgpoints1, imgpoints2, result1['mtx'], result1['dist'], result2['mtx'], result2['dist'], gray.shape[::-1])
 
-print(mtx1, mtx2)
+print('mtx1:', mtx1, '\nmtx2:', mtx2)
 
-cap.release()
+cap1.release()
+cap2.release()
 cv2.destroyAllWindows()
