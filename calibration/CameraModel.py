@@ -15,10 +15,10 @@ class WideCamera:
                     + cv2.fisheye.CALIB_CHECK_COND \
                     + cv2.fisheye.CALIB_FIX_SKEW
     
-    def __init__(self, device_index, (cols, rows)):
+    def __init__(self, device_index, chess_size):
         self.device_index = device_index
-        self.cols = cols
-        self.rows = rows
+        self.cols = chess_size[0]
+        self.rows = chess_size[1]
         self.cap = cv2.VideoCapture(self.device_index)
         self.objp = np.zeros((1, self.rows*self.cols, 3), np.float32)
         self.objp[0,:,:2] = np.mgrid[0:self.cols, 0:self.rows].T.reshape(-1, 2)
@@ -26,24 +26,28 @@ class WideCamera:
         self.imgpoints = []
         self.size = self.getSize()
 
+    def __del__(self):
+        self.cap.release()
+        print('goodbye!')
+
     def getCapture(self):
         return self.cap
 
     def getFrame(self):
         return self.frame
 
-    def readCap(self):
+    def read(self):
         self.available, self.frame = self.cap.read()
 
     def getGray(self):
         return cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
 
     def getSize(self):
-        self.readCap()
+        self.read()
         return self.getGray().shape[::-1]
 
     def findChess(self):
-        self.found, self.corners = cv2.findChessboardCorners(self.frame, (self.cols, self.rows), flags=find_chess_flags)
+        self.found, self.corners = cv2.findChessboardCorners(self.frame, (self.cols, self.rows), flags=self.find_chess_flags)
 
     def getCorners(self):
         return self.corners
@@ -52,8 +56,8 @@ class WideCamera:
         return self.found
 
     def appendPoints(self):
-        self.objpoints.append(objp)
-        cv2.cornerSubPix(self.getGray(), self.corners, (11,11), (-1,-1), subpix_criteria)
+        self.objpoints.append(self.objp)
+        cv2.cornerSubPix(self.getGray(), self.corners, (11,11), (-1,-1), self.subpix_criteria)
         self.imgpoints.append(self.corners)
 
     def drawChess(self):
@@ -64,16 +68,18 @@ class WideCamera:
         n = len(self.objpoints)
         rvecs = [np.zeros((1,1,3), dtype=np.float64) for i in range(n)]
         tvecs = [np.zeros((1,1,3), dtype=np.float64) for i in range(n)]
-        rms, _, _, _, _ = cv2.fisheye.calibrate(
+        ret, k, d, rvecs, tvecs = cv2.fisheye.calibrate(
             self.objpoints,
-            self,imgpoints,
+            self.imgpoints,
             self.size,
-            K,
-            D,
+            self.K,
+            self.D,
             rvecs,
             tvecs,
-            calibration_flags,
+            self.calibration_flags,
             (cv2.TERM_CRITERIA_EPS+cv2.TERM_CRITERIA_MAX_ITER, 30, 1e-6)
         )
-        print("K = np.array(" + str(K.tolist()) + ")")
-        print("D = np.array(" + str(D.tolist()) + ")")
+        print("K = np.array(" + str(k.tolist()) + ")")
+        print("D = np.array(" + str(d.tolist()) + ")")
+
+        return ret, k, d, rvecs, tvecs
