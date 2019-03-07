@@ -24,7 +24,8 @@ class WideCamera:
         self.objp[0,:,:2] = np.mgrid[0:self.cols, 0:self.rows].T.reshape(-1, 2)
         self.objpoints = []
         self.imgpoints = []
-        self.size = self.getSize()
+        self.read()
+        self.size = self.frame.shape[:2]
 
     def __del__(self):
         self.cap.release()
@@ -43,8 +44,7 @@ class WideCamera:
         return cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
 
     def getSize(self):
-        self.read()
-        return self.getGray().shape[::-1]
+        return self.size
 
     def findChess(self):
         self.found, self.corners = cv2.findChessboardCorners(self.frame, (self.cols, self.rows), flags=self.find_chess_flags)
