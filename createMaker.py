@@ -6,7 +6,7 @@ dictionary = aruco.getPredefinedDictionary(aruco.DICT_6X6_50)
 
 def arGenerator():
     fileName = "ar.png"
-    generator = aruco.drawMarker(dictionary, 0, 100)
+    generator = aruco.drawMarker(dictionary, 23, 100)
     cv2.imwrite(fileName, generator)
 
     img = cv2.imread(fileName)
