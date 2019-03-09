@@ -19,10 +19,7 @@ def opener(file_path, massage):
     return data
 
 def getCameraMatrix():
-    return opener('camera_matrix', 'Camera matrix not fonud. Please run `calibration/realtimeCalibrate.py` before.')
-
-def getWideResult():
-    return opener('wide_result', 'info for wide camera not fonud. Please run `calibration/realtimeCalibrate_wide.py` before.')
+    return opener('camera_matrix', 'Camera matrix not fonud. Please run `calibration/realtimeCalibrate.py` or `realtimeCalibrate_wide.py` before.')
 
 def getUndistortedImage(image, cam_mtx, mode=0):
     h, w = image.shape[:2]
@@ -34,8 +31,8 @@ def getUndistortedImage(image, cam_mtx, mode=0):
     dst = dst[y:y+h, x:x+w]
     return dst
 
-def getUndistortedImage_wide(image, K, D):
+def getUndistortedImage_wide(image, cam_mtx):
     h, w = image.shape[:2]
-    map1, map2 = cv2.fisheye.initUndistortRectifyMap(K, D, np.eye(3), K, (h,w), cv2.CV_16SC2)
+    map1, map2 = cv2.fisheye.initUndistortRectifyMap(cam_mtx['mtx'], cam_mtx['dist'], np.eye(3), cam_mtx['mtx'], (h,w), cv2.CV_16SC2)
     undistorted_img = cv2.remap(image, map1, map2, interpolation=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT)
     return undistorted_img

@@ -42,13 +42,13 @@ while True:
     if count > COUNT_MAX:
         ret, K, D, rvecs, tvecs = cam1.calibrate()
         result['ret'] = ret
-        result['K'] = K
-        result['D'] = D
+        result['mtx'] = K
+        result['dist'] = D
         result['rvecs'] = rvecs
         result['tvecs'] = tvecs
 
         pprint.pprint(result)
-        with open('calibration/wide_result', 'wb') as output:
+        with open('calibration/camera_matrix', 'wb') as output:
             pickle.dump(result, output)
 
         break
