@@ -6,7 +6,7 @@ from time import sleep
 import pickle
 import pprint
 
-from cameraModel import WideCamera
+from CameraModel import WideCamera
 
 args = sys.argv
 

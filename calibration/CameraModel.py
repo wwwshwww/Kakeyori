@@ -4,8 +4,6 @@ import numpy as np
 # use chessboard when calibration
 
 class WideCamera:
-    K = np.zeros((3, 3))
-    D = np.zeros((4, 1))
     subpix_criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
     find_chess_flags = cv2.CALIB_CB_ADAPTIVE_THRESH \
                     + cv2.CALIB_CB_NORMALIZE_IMAGE \
@@ -25,7 +23,7 @@ class WideCamera:
         self.objpoints = []
         self.imgpoints = []
         self.read()
-        self.size = self.frame.shape[:2]
+        self.size = self.getGray().shape[::-1]
 
     def __del__(self):
         self.cap.release()
@@ -68,6 +66,8 @@ class WideCamera:
         n = len(self.objpoints)
         rvecs = [np.zeros((1,1,3), dtype=np.float64) for i in range(n)]
         tvecs = [np.zeros((1,1,3), dtype=np.float64) for i in range(n)]
+        self.K = np.zeros((3, 3))
+        self.D = np.zeros((4, 1))
         ret, k, d, rvecs, tvecs = cv2.fisheye.calibrate(
             self.objpoints,
             self.imgpoints,
@@ -77,7 +77,7 @@ class WideCamera:
             rvecs,
             tvecs,
             self.calibration_flags,
-            (cv2.TERM_CRITERIA_EPS+cv2.TERM_CRITERIA_MAX_ITER, 30, 1e-6)
+            (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 1e-6)
         )
         print("K = np.array(" + str(k.tolist()) + ")")
         print("D = np.array(" + str(d.tolist()) + ")")
