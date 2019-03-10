@@ -88,4 +88,13 @@ class WideCamera:
         print("K = np.array(" + str(k.tolist()) + ")")
         print("D = np.array(" + str(d.tolist()) + ")")
 
+        self.K = k
+        self.D = d
+
         return ret, k, d, rvecs, tvecs
+
+    def getK(self):
+        return self.K
+
+    def getD(self):
+        return self.D

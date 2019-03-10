@@ -19,6 +19,11 @@ count = 0
 cam1 = WideCamera(1, (COLS, ROWS))
 cam2 = WideCamera(2, (COLS, ROWS))
 
+def allClose():
+    global cam1, cam2
+    del cam1, cam2
+    cv2.destroyAllWindows()
+
 while True:
     cam1.read()
     cam2.read()
@@ -42,14 +47,27 @@ while True:
 
     if count > COUNT_MAX:
         ret1, K1, D1, rvecs1, tvecs1 = cam1.calibrate()
-        ret2, K2, D2, rvecs2, tvecs2 = cam1.calibrate()
+        ret2, K2, D2, rvecs2, tvecs2 = cam2.calibrate()
 
         pprint.pprint((K1, K2))
         break
     
     if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+        allClose()
+        exit()
 
-del cam1, cam2
-cv2.destroyAllWindows()
+ret, K1, D1, K2, D2, R, T = cv2.fisheye.stereoCalibrate(
+    cam1.getObjectPoints(),
+    cam1.getImagePoints(),
+    cam2.getImagePoints(),
+    cam1.getK(),
+    cam1.getD(),
+    cam2.getK(),
+    cam2.getD(),
+    cam1.getSize()
+)
+print(ret, K1, D1, K2, D2, R, T)
+
+allClose()
+
     
