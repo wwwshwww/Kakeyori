@@ -44,6 +44,12 @@ class WideCamera:
     def getSize(self):
         return self.size
 
+    def getObjectPoints(self):
+        return self.objpoints
+
+    def getImagePoints(self):
+        return self.imgpoints
+
     def findChess(self):
         self.found, self.corners = cv2.findChessboardCorners(self.frame, (self.cols, self.rows), flags=self.find_chess_flags)
 
