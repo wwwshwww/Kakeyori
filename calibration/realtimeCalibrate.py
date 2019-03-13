@@ -5,6 +5,7 @@ import sys
 from time import sleep
 import pickle
 import pprint
+import calibrated
 
 args = sys.argv
 cap = cv2.VideoCapture(1)
@@ -65,9 +66,8 @@ while True:
         result_matrix['tvecs'] = tvecs
 
         pprint.pprint(result_matrix)
-        output = open('calibration/temp/camera_matrix', 'wb')
-        pickle.dump(result_matrix, output)
-        output.close
+
+        calibrated.outputter('camera_matrix', result_matrix)
 
         mean_error = 0
         for i in range(len(objpoints)):

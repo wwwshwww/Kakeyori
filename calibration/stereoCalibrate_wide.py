@@ -5,6 +5,7 @@ from time import sleep
 from CameraModel import WideCamera
 from pprint import pprint
 import pickle
+import calibrated
 
 args = sys.argv
 
@@ -113,8 +114,7 @@ result['D2'] = D2
 result['R'] = R
 result['T'] = T
 
-with open('calibration/temp/stereo_matrix', 'wb') as out:
-    pickle.dump(result, out)
+calibrated.outputter('stereo_matrix', result)
 
 allClose()
 

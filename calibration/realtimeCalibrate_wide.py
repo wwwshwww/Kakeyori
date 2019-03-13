@@ -5,6 +5,7 @@ import sys
 from time import sleep
 import pickle
 import pprint
+import calibrated
 
 from CameraModel import WideCamera
 
@@ -48,8 +49,7 @@ while True:
         result['tvecs'] = tvecs
 
         pprint.pprint(result)
-        with open('calibration/temp/camera_matrix', 'wb') as output:
-            pickle.dump(result, output)
+        calibrated.outputter('camera_matrix', result)
 
         break
 
