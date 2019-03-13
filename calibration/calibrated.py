@@ -8,6 +8,12 @@ import sys
 
 this_path = os.path.dirname(__file__)
 
+def outputter(file_name, val):
+    path = this_path + '/temp/' + file_name
+    with open(path, 'wb') as f:
+        pickle.dump(val, f)
+    print('outputted file to ' + path)
+
 def opener(file_path, massage):
     try:
         with open(this_path + '/temp/' + file_path, 'rb') as f:
