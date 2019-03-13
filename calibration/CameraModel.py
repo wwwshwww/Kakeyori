@@ -65,7 +65,7 @@ class WideCamera:
         cv2.cornerSubPix(self.getGray(), self.corners, (11,11), (-1,-1), self.subpix_criteria)
         self.imgpoints.append(self.corners)
 
-    def drawChess(self):
+    def drawCorners(self):
         frame = cv2.drawChessboardCorners(self.frame, (self.cols, self.rows), self.corners, self.found)
         return frame
 

@@ -31,7 +31,7 @@ while True:
     # success find chessboard
     if cam1.isFoundChess():
         cam1.appendPoints()
-        frame = cam1.drawChess()
+        frame = cam1.drawCorners()
 
         print(cam1.getCorners())
         print(count)
