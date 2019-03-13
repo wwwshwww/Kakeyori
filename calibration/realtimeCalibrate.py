@@ -65,7 +65,7 @@ while True:
         result_matrix['tvecs'] = tvecs
 
         pprint.pprint(result_matrix)
-        output = open('calibration/camera_matrix', 'wb')
+        output = open('calibration/temp/camera_matrix', 'wb')
         pickle.dump(result_matrix, output)
         output.close
 
