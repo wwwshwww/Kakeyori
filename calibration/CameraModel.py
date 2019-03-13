@@ -5,6 +5,7 @@ import numpy as np
 
 class WideCamera:
     subpix_criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
+    calibration_criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 1e-6)
     find_chess_flags = cv2.CALIB_CB_ADAPTIVE_THRESH \
                     + cv2.CALIB_CB_NORMALIZE_IMAGE \
                     + cv2.CALIB_CB_FILTER_QUADS \
@@ -83,10 +84,12 @@ class WideCamera:
             rvecs,
             tvecs,
             self.calibration_flags,
-            (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 1e-6)
+            self.calibration_criteria
         )
+        print("========= one side =========")
         print("K = np.array(" + str(k.tolist()) + ")")
         print("D = np.array(" + str(d.tolist()) + ")")
+        print("========= ======== =========")
 
         self.K = k
         self.D = d
