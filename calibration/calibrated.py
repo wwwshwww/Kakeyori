@@ -10,7 +10,7 @@ this_path = os.path.dirname(__file__)
 
 def opener(file_path, massage):
     try:
-        with open(this_path + '/' + file_path, 'rb') as f:
+        with open(this_path + '/temp/' + file_path, 'rb') as f:
             data = pickle.load(f)
             pprint.pprint(data)
     except FileNotFoundError:
