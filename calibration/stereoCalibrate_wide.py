@@ -4,6 +4,7 @@ import sys
 from time import sleep
 from CameraModel import WideCamera
 from pprint import pprint
+import pickle
 
 args = sys.argv
 
@@ -52,7 +53,6 @@ while True:
         ret1, K1, D1, rvecs1, tvecs1 = cam1.calibrate()
         ret2, K2, D2, rvecs2, tvecs2 = cam2.calibrate()
 
-        print(K1, '\n', D1, '\n', K2, '\n', D2)
         break
     
     if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -102,7 +102,19 @@ ret, K1, D1, K2, D2, R, T = cv2.fisheye.stereoCalibrate(
     WideCamera.calibration_criteria
 )
 
-print(ret, K1, D1, K2, D2, R, T)
+print('ret:\n', ret, '\nK1:\n', K1,'\nD1:\n', D1,'\nK2:\n', K2,'\nD2:\n', D2,'\nR:\n', R,'\nT:\n', T)
+
+result = {}
+result['ret'] = ret
+result['K1'] = K1
+result['D1'] = D1
+result['K2'] = K2
+result['D2'] = D2
+result['R'] = R
+result['T'] = T
+
+with open('calibration/temp/stereo_matrix', 'wb') as out:
+    pickle.dump(result, out)
 
 allClose()
 
