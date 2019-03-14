@@ -38,8 +38,8 @@ while True:
     if cam1.isFoundChess() and cam2.isFoundChess():
         cam1.appendPoints()
         cam2.appendPoints()
-        frame1 = cam1.drawChess()
-        frame2 = cam2.drawChess()
+        frame1 = cam1.drawCorners()
+        frame2 = cam2.drawCorners()
         print(count)
         count += 1
 
@@ -105,16 +105,53 @@ ret, K1, D1, K2, D2, R, T = cv2.fisheye.stereoCalibrate(
 
 print('ret:\n', ret, '\nK1:\n', K1,'\nD1:\n', D1,'\nK2:\n', K2,'\nD2:\n', D2,'\nR:\n', R,'\nT:\n', T)
 
-result = {}
-result['ret'] = ret
-result['K1'] = K1
-result['D1'] = D1
-result['K2'] = K2
-result['D2'] = D2
-result['R'] = R
-result['T'] = T
+mtx = {}
 
-calibrated.outputter('stereo_matrix', result)
+mtx['ret'] = ret
+mtx['K1'] = K1
+mtx['D1'] = D1
+mtx['K2'] = K2
+mtx['D2'] = D2
+mtx['R'] = R
+mtx['T'] = T
+
+calibrated.outputter('stereo_matrices', mtx)
+
+R1, R2, P1, P2, Q = cv2.fisheye.stereoRectify(
+    K1,
+    D1,
+    K2,
+    D2,
+    cam1.getSize(),
+    R,
+    T,
+    0
+)
+pprint((R1, R2, P1, P2, Q))
+
+stereo_rect = {}
+stereo_rect['R1'] = R1
+stereo_rect['R2'] = R2
+stereo_rect['P1'] = P1
+stereo_rect['P2'] = P2
+stereo_rect['Q'] = Q
+
+calibrated.outputter('stereo_rect', stereo_rect)
+
+m1type = cv2.CV_32FC1
+map1_l, map2_l = cv2.fisheye.initUndistortRectifyMap(K1, D1, R1, P1, cam1.getSize(), m1type)
+map1_r, map2_r = cv2.fisheye.initUndistortRectifyMap(K2, D2, R2, P2, cam2.getSize(), m1type)
+
+print(map1_l, map2_l)
+print(map2_l, map2_r)
+
+stereo_map = {}
+stereo_map['map1_l'] = map1_l
+stereo_map['map1_r'] = map1_r
+stereo_map['map2_l'] = map2_l
+stereo_map['map2_r'] = map2_r
+
+calibrated.outputter('stereo_map', stereo_map)
 
 allClose()
 

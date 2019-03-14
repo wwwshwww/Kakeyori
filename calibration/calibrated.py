@@ -27,6 +27,9 @@ def opener(file_path, massage):
 def getCameraMatrix():
     return opener('camera_matrix', 'Camera matrix not fonud. Please run `calibration/realtimeCalibrate.py` or `realtimeCalibrate_wide.py` before.')
 
+def getStereoMatrix():
+    return opener('stereo_matrices', 'stereo_matrices not found. Please run `calibration/stereoCalibrate_wide.py` before.')
+
 def getUndistortedImage(image, cam_mtx, mode=0):
     h, w = image.shape[:2]
     newcameramtx, roi = cv2.getOptimalNewCameraMatrix(cam_mtx['mtx'], cam_mtx['dist'], (w,h), mode, (w,h))
