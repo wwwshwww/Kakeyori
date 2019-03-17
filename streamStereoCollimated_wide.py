@@ -16,11 +16,14 @@ while True:
     ret1, frame1 = cap1.read()
     ret2, frame2 = cap2.read()
 
-    re_frame1 = cv2.remap(frame2, maps['map1_l'], maps['map2_l'], interpolation)
-    re_frame2 = cv2.remap(frame1, maps['map1_r'], maps['map2_r'], interpolation)
+    re_frame1 = cv2.remap(frame1, maps['map1_l'], maps['map2_l'], interpolation)
+    re_frame2 = cv2.remap(frame2, maps['map1_r'], maps['map2_r'], interpolation)
 
     # re_frame1 = cv2.blur(re_frame1,(5,5))
     # re_frame2 = cv2.blur(re_frame2,(5,5))
+
+    # re_frame1 = cv2.GaussianBlur(re_frame1,(3,3), 0)
+    # re_frame2 = cv2.GaussianBlur(re_frame2,(3,3), 0)
 
     stacked = np.hstack((re_frame1[:,:], re_frame2[:,:]))
     cv2.imshow('collimated views', stacked)
@@ -32,7 +35,11 @@ while True:
     gray1 = cv2.GaussianBlur(cv2.equalizeHist(gray1),(5,5), 0)
     gray2 = cv2.GaussianBlur(cv2.equalizeHist(gray2),(5,5), 0)
 
-    stereo = cv2.StereoBM_create(80,5)
+    stacked_gray = np.hstack((gray1[:], gray2[:]))
+    cv2.imshow('gray views', stacked_gray)
+    cv2.moveWindow('gray views', 0, 0)
+
+    stereo = cv2.StereoBM_create(16,5)
 
     # block_size = 27
     # min_disp = 0
@@ -45,13 +52,15 @@ while True:
     # )
 
 
-    disparity = stereo.compute(gray1, gray2).astype(np.float32) / 700.0
+    disparity = stereo.compute(gray1, gray2).astype(np.float32) / 256.0
     # disparity = cv2.GaussianBlur(disparity,(21,21),0)
     # disparity = cv2.medianBlur(disparity, 5)
-    for i in range(3):
-        # disparity = cv2.blur(disparity, (1+(i*2),1+(i*2)))
-        disparity = cv2.GaussianBlur(disparity,(7, 7),0)
+    # for i in range(3):
+    #     # disparity = cv2.blur(disparity, (1+(i*2),1+(i*2)))
+    #     disparity = cv2.GaussianBlur(disparity,(7, 7),0)
+    # disparity = cv2.GaussianBlur(disparity,(7, 7),0)
     cv2.imshow('disparity', disparity)
+    cv2.moveWindow('disparity', 640, 800)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
