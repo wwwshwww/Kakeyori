@@ -62,7 +62,7 @@ class WideCamera:
 
     def appendPoints(self):
         self.objpoints.append(self.objp)
-        cv2.cornerSubPix(self.getGray(), self.corners, (11,11), (-1,-1), self.subpix_criteria)
+        # cv2.cornerSubPix(self.getGray(), self.corners, (11,11), (-1,-1), self.subpix_criteria)
         self.imgpoints.append(self.corners)
 
     def drawCorners(self):
