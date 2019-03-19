@@ -5,7 +5,7 @@ from calibration import calibrated
 cap1 = cv2.VideoCapture(1)
 cap2 = cv2.VideoCapture(2)
 
-interpolation = cv2.INTER_CUBIC
+interpolation = cv2.INTER_NEAREST
 
 rect = calibrated.getStereoRect()
 maps = calibrated.getStereoMap()
@@ -39,7 +39,7 @@ while True:
     cv2.imshow('gray views', stacked_gray)
     cv2.moveWindow('gray views', 0, 0)
 
-    stereo = cv2.StereoBM_create(16,5)
+    stereo = cv2.StereoBM_create(16,11)
 
     # block_size = 27
     # min_disp = 0
