@@ -33,8 +33,12 @@ while True:
     cv2.imshow('views', stacked)
     cv2.moveWindow('views', 0, 0)
 
+    if len(corners1) == 1 and len(corners2) == 1:
+        inter1 = intersection.getQuadIntersection(corners1[0][0][:])
+        inter2 = intersection.getQuadIntersection(corners2[0][0][:])
 
-
+        d = (150 * 805) / (inter1[0] - inter2[0])
+        print(d)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
