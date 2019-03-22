@@ -18,4 +18,5 @@ def getQuadIntersection(pos):
     coef = np.array([[fx1, fy1], [fx2, fy2]])
     dep = np.array([s1, s2])
 
-    return np.linalg.solve(coef, dep)
+    ans = np.linalg.solve(coef, dep)
+    return (int(ans[0]), int(ans[1]))

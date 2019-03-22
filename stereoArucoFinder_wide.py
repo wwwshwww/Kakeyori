@@ -26,19 +26,23 @@ while True:
     corners1, ids1, rejectedImgPoints1 = aruco.detectMarkers(frame1, dictionary)
     corners2, ids2, rejectedImgPoints2 = aruco.detectMarkers(frame2, dictionary)
 
-    frame1 = aruco.drawDetectedMarkers(frame1, corners1, ids1)
-    frame2 = aruco.drawDetectedMarkers(frame2, corners2, ids2)
+    if len(corners1) == 1 and len(corners2) == 1:
+        frame1 = aruco.drawDetectedMarkers(frame1, corners1, ids1)
+        frame2 = aruco.drawDetectedMarkers(frame2, corners2, ids2)
+
+        inter1 = intersection.getQuadIntersection(corners1[0][0][:])
+        inter2 = intersection.getQuadIntersection(corners2[0][0][:])
+
+        cv2.circle(frame1, inter1, 40, (20, 200, 0), 6, 6)
+        cv2.circle(frame2, inter2, 40, (20, 200, 0), 6, 6)
+
+        d = (150 * 805) / (inter1[0] - inter2[0])
+        print(d)
 
     stacked = np.hstack((frame1[:,:], frame2[:,:]))
     cv2.imshow('views', stacked)
     cv2.moveWindow('views', 0, 0)
 
-    if len(corners1) == 1 and len(corners2) == 1:
-        inter1 = intersection.getQuadIntersection(corners1[0][0][:])
-        inter2 = intersection.getQuadIntersection(corners2[0][0][:])
-
-        d = (150 * 805) / (inter1[0] - inter2[0])
-        print(d)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 

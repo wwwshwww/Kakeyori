@@ -12,7 +12,8 @@ class WideCamera:
                     + cv2.CALIB_CB_FAST_CHECK
     calibration_flags = cv2.fisheye.CALIB_RECOMPUTE_EXTRINSIC \
                     + cv2.fisheye.CALIB_CHECK_COND \
-                    + cv2.fisheye.CALIB_FIX_SKEW
+                    + cv2.fisheye.CALIB_FIX_SKEW \
+                    + cv2.fisheye.CALIB_FIX_PRINCIPAL_POINT
     
     def __init__(self, device_index, chess_size):
         self.device_index = device_index
