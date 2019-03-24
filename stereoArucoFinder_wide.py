@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import math
 from calibration import calibrated
 from coordinate import intersection
 
@@ -11,8 +12,13 @@ cap2 = cv2.VideoCapture(2)
 
 interpolation = cv2.INTER_NEAREST
 
+s_mtx = calibrated.getStereoMatrix()
 rect = calibrated.getStereoRect()
 maps = calibrated.getStereoMap()
+
+sk = s_mtx['K1']
+sdis = sk[0,0]
+print(sdis)
 
 print(maps)
 
@@ -36,7 +42,9 @@ while True:
         cv2.circle(frame1, inter1, 20, (255, 255, 0), -1)
         cv2.circle(frame2, inter2, 20, (255, 255, 0), -1)
 
-        d = (150 * 805) / (inter1[0] - inter2[0])
+        tmp = math.sqrt((inter1[0] - inter2[0]) ** 2 + (inter1[1] - inter2[1]) ** 2)
+        # d = (X vec of T) * (a11 of K1) / disparity
+        d = (2.6 * sdis) / tmp
         print(d)
 
     stacked = np.hstack((frame1[:,:], frame2[:,:]))
