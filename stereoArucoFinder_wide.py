@@ -27,14 +27,14 @@ while True:
     corners2, ids2, rejectedImgPoints2 = aruco.detectMarkers(frame2, dictionary)
 
     if len(corners1) == 1 and len(corners2) == 1:
-        frame1 = aruco.drawDetectedMarkers(frame1, corners1, ids1)
-        frame2 = aruco.drawDetectedMarkers(frame2, corners2, ids2)
+        # frame1 = aruco.drawDetectedMarkers(frame1, corners1, ids1)
+        # frame2 = aruco.drawDetectedMarkers(frame2, corners2, ids2)
 
         inter1 = intersection.getQuadIntersection(corners1[0][0][:])
         inter2 = intersection.getQuadIntersection(corners2[0][0][:])
 
-        cv2.circle(frame1, inter1, 40, (20, 200, 0), 6, 6)
-        cv2.circle(frame2, inter2, 40, (20, 200, 0), 6, 6)
+        cv2.circle(frame1, inter1, 20, (255, 255, 0), -1)
+        cv2.circle(frame2, inter2, 20, (255, 255, 0), -1)
 
         d = (150 * 805) / (inter1[0] - inter2[0])
         print(d)
