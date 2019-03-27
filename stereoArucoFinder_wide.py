@@ -16,8 +16,11 @@ s_mtx = calibrated.getStereoMatrix()
 rect = calibrated.getStereoRect()
 maps = calibrated.getStereoMap()
 
+tmpret, tmpframe = cap1.read()
+h, w = tmpframe.shape[:2]
+
 sk = s_mtx['K1']
-sdis = sk[0,0]
+sdis = sk[0,0] / 1280
 print(sdis)
 
 print(maps)
@@ -44,8 +47,16 @@ while True:
 
         tmp = math.sqrt((inter1[0] - inter2[0]) ** 2 + (inter1[1] - inter2[1]) ** 2)
         # d = (X vec of T) * (a11 of K1) / disparity
-        d = (2.6 * sdis) / tmp
+        d = (400 * sdis) / tmp
         print(d)
+
+        px = (inter1[0] + inter2[0]) / 2. - w / 2.
+        py = (inter1[1] + inter2[1]) / 2. - h / 2.
+
+        rx = px * d
+        ry = py * d
+
+        print(rx, ry)
 
     stacked = np.hstack((frame1[:,:], frame2[:,:]))
     cv2.imshow('views', stacked)
