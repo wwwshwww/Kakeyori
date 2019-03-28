@@ -4,6 +4,9 @@ import math
 from calibration import calibrated
 from coordinate import intersection
 
+STEREO_DIST = 650
+MM_PER_PIX = 0.00281
+
 aruco = cv2.aruco
 dictionary = aruco.getPredefinedDictionary(aruco.DICT_6X6_250)
 
@@ -20,7 +23,7 @@ tmpret, tmpframe = cap1.read()
 h, w = tmpframe.shape[:2]
 
 sk = s_mtx['K1']
-sdis = sk[0,0] / 1280
+sdis = sk[0,0]
 print(sdis)
 
 print(maps)
@@ -47,14 +50,14 @@ while True:
 
         tmp = math.sqrt((inter1[0] - inter2[0]) ** 2 + (inter1[1] - inter2[1]) ** 2)
         # d = (X vec of T) * (a11 of K1) / disparity
-        d = (400 * sdis) / tmp
-        print(d)
+        d = (STEREO_DIST * sdis) / tmp
+        print(d * MM_PER_PIX)
 
         px = (inter1[0] + inter2[0]) / 2. - w / 2.
         py = (inter1[1] + inter2[1]) / 2. - h / 2.
 
-        rx = px * d
-        ry = py * d
+        rx = px * d * MM_PER_PIX ** 2
+        ry = py * d * MM_PER_PIX ** 2
 
         print(rx, ry)
 
