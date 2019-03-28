@@ -56,8 +56,8 @@ while True:
         px = (inter1[0] + inter2[0]) / 2. - w / 2.
         py = (inter1[1] + inter2[1]) / 2. - h / 2.
 
-        rx = px * d * MM_PER_PIX ** 2
-        ry = py * d * MM_PER_PIX ** 2
+        rx = px * d * (MM_PER_PIX ** 2)
+        ry = py * d * (MM_PER_PIX ** 2)
 
         print(rx, ry)
 
