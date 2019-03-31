@@ -10,8 +10,8 @@ MM_PER_PIX = 0.00281
 aruco = cv2.aruco
 dictionary = aruco.getPredefinedDictionary(aruco.DICT_6X6_250)
 
-cap1 = cv2.VideoCapture(1)
-cap2 = cv2.VideoCapture(2)
+cap1 = cv2.VideoCapture(2)
+cap2 = cv2.VideoCapture(1)
 
 interpolation = cv2.INTER_NEAREST
 
@@ -50,16 +50,27 @@ while True:
 
         tmp = math.sqrt((inter1[0] - inter2[0]) ** 2 + (inter1[1] - inter2[1]) ** 2)
         # d = (X vec of T) * (a11 of K1) / disparity
-        d = (STEREO_DIST * sdis) / tmp
-        print(d * MM_PER_PIX)
+        z = (STEREO_DIST * sdis) / tmp
+        rz = z * MM_PER_PIX
+        print(rz)
 
         px = (inter1[0] + inter2[0]) / 2. - w / 2.
         py = (inter1[1] + inter2[1]) / 2. - h / 2.
 
-        rx = px * d * (MM_PER_PIX ** 2)
-        ry = py * d * (MM_PER_PIX ** 2)
+        # calc relative coordinates X and Y
+        rx = px * z * (MM_PER_PIX ** 2)
+        ry = py * z * (MM_PER_PIX ** 2)
 
-        print(rx, ry)
+        # calc relative angle θ1 and θ2
+        # temporary, only use θ1 that include angle of width
+        # these are absolute angle of radian, so like to make to be converted coordinates
+        theta1 = math.atan2(rz, rx)
+        theta2 = math.atan2(rz, ry)
+
+        # '90' is front
+        print("xθ:", math.degrees(theta1)-90, "\nyθ:", math.degrees(theta2)-90)
+
+        print("X:", rx, "\nY:", ry)
 
     stacked = np.hstack((frame1[:,:], frame2[:,:]))
     cv2.imshow('views', stacked)
