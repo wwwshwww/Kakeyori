@@ -11,7 +11,7 @@ this_path = os.path.dirname(__file__)
 def outputter(file_name, val):
     path = this_path+'/temp/'+file_name
     with open(path, 'wb') as f:
-        pickle.dump(val, f)
+        pickle.dump(val, f, protocol=2)
     print('outputted file to ' + path)
 
 def opener(file_path, message):
