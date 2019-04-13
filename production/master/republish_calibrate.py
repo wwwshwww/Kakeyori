@@ -23,7 +23,7 @@ class republishCalibrate():
         self.mf = message_filters.ApproximateTimeSynchronizer([self.sub_left, self.sub_right], 100, 10.0)
         self.mf.registerCallback(self.callback)
 
-    def calibrate(img_left, img_right):
+    def calibrate(self, img_left, img_right):
         left = cv2.remap(img_left, maps['map1_l'], maps['map2_l'], interporation)
         right = cv2.remap(img_right, maps['map1_r'], maps['map2_r'], interporation)
         return left, right
