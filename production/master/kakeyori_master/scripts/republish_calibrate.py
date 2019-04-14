@@ -10,9 +10,9 @@ from sensor_msgs.msg import Image
 import calibration.calibrated as calibrated
 
 maps = calibrated.getStereoMap()
+interporation = cv2.INTER_NEAREST
 
 class republishCalibrate():
-    interporation = cv2.INTER_NEAREST
 
     def __init__(self):
         self.br = CvBridge()
