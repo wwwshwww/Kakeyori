@@ -18,6 +18,7 @@ MM_PER_PIX = 0.00281 # yeah
 
 class arucoFinder():
     def __init__(self):
+        self.isReady = True
         self.aruco = cv2.aruco
         self.ar_dict = self.aruco.getPredefinedDictionary(aruco.DICT_6x6_250)
         self.interporation = cv2.INTER_NEAREST
@@ -80,9 +81,12 @@ class arucoFinder():
         if len(corners_l) == 1 and len(corners_r) == 1:
             inter_l, inter_r = self.getQuadIntersections(corners_l, corners_r)
             rx, _, rz, theta1, _ = self.getRelative(inter_l, inter_r)
-            self.client(rx, rz, theta1)
+            if isReady:
+                isArrive = self.client(rx, rz, theta1)
+                print(isArrive, rospy.get_time())
             
     def client(self, x, y, theta):
+        isReady = False
         rospy.wait_for_service('point_surrenderer')
         try:
             point_surrenderer = rospy.ServiceProxy('point_surrenderer', RelativeCoordinates)
