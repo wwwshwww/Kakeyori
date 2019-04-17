@@ -81,16 +81,17 @@ class arucoFinder():
         if len(corners_l) == 1 and len(corners_r) == 1:
             inter_l, inter_r = self.getQuadIntersections(corners_l, corners_r)
             rx, _, rz, theta1, _ = self.getRelative(inter_l, inter_r)
-            if isReady:
+            if self.isReady:
                 isArrive = self.client(rx, rz, theta1)
                 print(isArrive, rospy.get_time())
             
     def client(self, x, y, theta):
-        isReady = False
+        self.isReady = False
         rospy.wait_for_service('point_surrenderer')
         try:
             point_surrenderer = rospy.ServiceProxy('point_surrenderer', RelativeCoordinates)
             resp = point_surrenderer(x, y, thata)
+            self.isReady = True
             return resp.isGoal
         except rospy.ServiceException, e:
             print("Service call faild: %s"%e)
