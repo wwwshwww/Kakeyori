@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import kakeyori_master.srv import *
+from kakeyori_master.srv import *
 import rospy
 import actionlib
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
@@ -11,18 +11,18 @@ class coordinatesSystem():
         self.x = 0
         self.y = 0
         self.theta = 0
-        self.odom_sub = rospy.Subscriber('/odom', Odometry, update)
+        self.odom_sub = rospy.Subscriber('/odom', Odometry, self.update)
 
     def update(self, data):
         self.x = data.pose.pose.position.x
         self.y = data.pose.pose.position.y
-        self.theta = data.pose.pose.orientation.z)
+        self.theta = data.pose.pose.orientation.z
 
 def normalizeTheta(theta):
     t = 0
     if theta < 0:
         t = 2 * math.pi + theta
-    else if theta > 2 * math.pi:
+    elif theta > 2 * math.pi:
         t = theta % (2 * math.pi)
     else:
         t = theta
@@ -40,7 +40,7 @@ class setGoal():
         y = self.world.y + rela_r * math.sin(angle) / 100
         return x, y, angle
 
-    def movbaseClient(self, x, y, theta):
+    def movebaseClient(self, x, y, theta):
         client = actionlib.SimpleActionClient('move_base', MoveBaseAction)
         client.wait_for_server()
 
@@ -50,8 +50,10 @@ class setGoal():
         goal.target_pose.pose.position.x = x
         goal.target_pose.pose.position.y = y
         goal.target_pose.pose.orientation.w = theta
-        client.send_goal(goal)
 
+        client.send_goal(goal)
+        wait = client.wait_for_result()
+        
         if not wait:
             rospy.logerr("server not available!")
             rospy.signal_shutdown("server not available!")
