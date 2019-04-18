@@ -18,9 +18,19 @@ class coordinatesSystem():
         self.y = data.pose.pose.position.y
         self.theta = data.pose.pose.orientation.z)
 
+def normalizeTheta(theta):
+    t = 0
+    if theta < 0:
+        t = 2 * math.pi + theta
+    else if theta > 2 * math.pi:
+        t = theta % (2 * math.pi)
+    else:
+        t = theta
+    return t
+
 def getGoalCoordinates(world, rela_x, rela_r, rela_theta):
     # to be normalized
-    angle = rela_theta + world.theta
+    angle = normalizeTheta(rela_theta + world.theta)
     x = rela_r * math.cos(angle)
     y = rela_r * math.sin(angle)
     x /= 100 # cm to m
