@@ -28,41 +28,43 @@ def normalizeTheta(theta):
         t = theta
     return t
 
-def getGoalCoordinates(world, rela_x, rela_r, rela_theta):
-    # to be normalized
-    angle = normalizeTheta(rela_theta + world.theta)
-    x = rela_r * math.cos(angle)
-    y = rela_r * math.sin(angle)
-    x /= 100 # cm to m
-    y /= 100
-    return x, y, angle
+class setGoal():
+    def __init__(self):
+        self.world = coordinatesSystem()
+        self.sr = rospy.Service('point_surrenderer', RelativeCoordinates, self.handleRelative)
 
-def movbaseClient(x, y, theta):
-    client = actionlib.SimpleActionClient('move_base', MoveBaseAction)
-    client.wait_for_server()
+    def getGoalCoordinates(self, rela_x, rela_r, rela_theta):
+        # to be normalized
+        angle = normalizeTheta(rela_theta + self.world.theta)
+        x = self.world.x + rela_r * math.cos(angle) / 100
+        y = self.world.y + rela_r * math.sin(angle) / 100
+        return x, y, angle
 
-    goal = MoveBaseGoal()
-    goal.target_pose.header.frame_id = "map"
-    goal.target_pose.header.stamp = rospy.Time.now()
-    goal.target_pose.pose.position.x = x
-    goal.target_pose.pose.position.y = y
-    goal.target_pose.pose.orientation.w = theta
-    client.send_goal(goal)
+    def movbaseClient(self, x, y, theta):
+        client = actionlib.SimpleActionClient('move_base', MoveBaseAction)
+        client.wait_for_server()
 
-    if not wait:
-        rospy.logerr("server not available!")
-        rospy.signal_shutdown("server not available!")
-    else:
-        return client.get_result()
+        goal = MoveBaseGoal()
+        goal.target_pose.header.frame_id = "map"
+        goal.target_pose.header.stamp = rospy.Time.now()
+        goal.target_pose.pose.position.x = x
+        goal.target_pose.pose.position.y = y
+        goal.target_pose.pose.orientation.w = theta
+        client.send_goal(goal)
 
-def handleRelative(req):
-    goal_x, goal_y, goal_angle = getGoalCoordinates(req.x, req.r, req.theta)
-    return movebaseClient(goal_x, goal_y, goal_angle)
+        if not wait:
+            rospy.logerr("server not available!")
+            rospy.signal_shutdown("server not available!")
+        else:
+            return client.get_result()
+
+    def handleRelative(self, req):
+        goal_x, goal_y, goal_angle = self.getGoalCoordinates(req.x, req.y, req.theta)
+        return self.movebaseClient(goal_x, goal_y, goal_angle)
 
 def main():
     rospy.init_node('point_surrenderer', anonymous=True)
-    wc = coordinatesSystem()
-    sr = rospy.Service('point_surrenderer', RelativeCoordinates, handleRelative)
+    sg = setGoal()
     print('ready')
     rospy.spin()
 
