@@ -5,13 +5,13 @@ from calibration import calibrated
 from coordinate import intersection
 
 STEREO_DIST = 650
-MM_PER_PIX = 0.00281
+MM_PER_PIX = 0.003
 
 aruco = cv2.aruco
 dictionary = aruco.getPredefinedDictionary(aruco.DICT_6X6_250)
 
-cap1 = cv2.VideoCapture(2)
-cap2 = cv2.VideoCapture(1)
+cap1 = cv2.VideoCapture(1)
+cap2 = cv2.VideoCapture(2)
 
 interpolation = cv2.INTER_NEAREST
 
@@ -55,6 +55,7 @@ while True:
         print(rz)
 
         px = (inter1[0] + inter2[0]) / 2. - w / 2.
+        px *= -1
         py = (inter1[1] + inter2[1]) / 2. - h / 2.
 
         # calc relative coordinates X and Y

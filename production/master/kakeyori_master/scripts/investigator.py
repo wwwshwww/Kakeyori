@@ -14,7 +14,7 @@ import cv2
 import math
 
 STEREO_DIST = 650 # px dist of both lenz in real cammera system
-MM_PER_PIX = 0.00281 # yeah
+MM_PER_PIX = 0.003 # sensor size mm / pixel
 
 class arucoFinder():
     def __init__(self):
@@ -32,7 +32,7 @@ class arucoFinder():
 
         self.br = CvBridge()
         self.sub_left = message_filters.Subscriber('/left/image_calibrated', Image)
-        self.sub_right = message_filters.Subscriber('right/image_calibrated', Image)
+        self.sub_right = message_filters.Subscriber('/right/image_calibrated', Image)
         self.mf = message_filters.ApproximateTimeSynchronizer([self.sub_left, self.sub_right], 100, 10.0)
         self.mf.registerCallback(self.callback)
 
@@ -55,26 +55,28 @@ class arucoFinder():
         return inter_l, inter_r
 
     def getRelative(self, inter_l, inter_r):
-        normalize_angle = math.pi * (1 / 2)
-        d = math.sqrt((inter_l[0] - inter_r[0])**2 + (inter_l[1] - inter_r[1])**2)
+        normalize_angle = math.pi / 2
+        dis = math.sqrt((inter_l[0] - inter_r[0])**2 + (inter_l[1] - inter_r[1])**2)
             # d = (X vec of T) * (a11 of K1) / disparity
-        z = (STEREO_DIST * self.focal_length) / d
-        rz = z * MM_PER_PIX
+        d = (STEREO_DIST * self.focal_length) / dis
+        r = d * MM_PER_PIX
 
-        px = (inter_l[0] + inter_r[0]) / 2. - self.w / 2.
-        py = (inter_l[1] + inter_r[1]) / 2. - self.h / 2.
+        pw = (inter_l[0] + inter_r[0]) / 2. - self.w / 2.
+        ph = (inter_l[1] + inter_r[1]) / 2. - self.h / 2.
 
         # calc relative coordinates X and Y
-        rx = px * z * (MM_PER_PIX**2)
-        ry = py * z * (MM_PER_PIX**2)
+        rw = pw * d * (MM_PER_PIX**2)
+        rh = ph * d * (MM_PER_PIX**2)
 
         # calc relative angle theta1 and theta2
         # temporary, only use theta1 that include angle of width
         # these are absolute angle of radian, so like to make to be normalized coordinates
-        theta1 = math.atan2(rz, rx) - normalize_angle # front is (1/2)*PI : 90 deg
-        theta2 = math.atan2(rz, ry) - normalize_angle # same
+        theta1 = math.atan2(r, rw) - normalize_angle # front is (1/2)*PI : 90 deg
+        theta2 = math.atan2(r, rh) - normalize_angle # same
 
-        return rx, ry, rz, theta1, theta2
+        print(rw, rh, r, math.degrees(theta1))
+
+        return rw, rh, r, theta1, theta2
         
     def callback(self, data_left, data_right):
         img_left, img_right = self.convertImgToCv2Both(data_left, data_right)
@@ -83,17 +85,19 @@ class arucoFinder():
 
         if len(corners_l) == 1 and len(corners_r) == 1:
             inter_l, inter_r = self.getQuadIntersections(corners_l, corners_r)
-            rx, _, rz, theta1, _ = self.getRelative(inter_l, inter_r)
+            rw, _, r, theta1, _ = self.getRelative(inter_l, inter_r)
             if self.isReady:
-                isArrive = self.client(rx, rz, theta1)
+                isArrive = self.client(rw, r, theta1)
                 print(isArrive, rospy.get_time())
             
-    def client(self, x, y, theta):
+    def client(self, rw, r, theta):
         self.isReady = False
+        self.sub_left.unregister()
+        self.sub_right.unregister()
         rospy.wait_for_service('point_surrenderer')
         try:
             point_surrenderer = rospy.ServiceProxy('point_surrenderer', RelativeCoordinates)
-            resp = point_surrenderer(x, y, theta)
+            resp = point_surrenderer(r, rw, theta)
             self.isReady = True
             return resp.isGoal
         except rospy.ServiceException, e:
