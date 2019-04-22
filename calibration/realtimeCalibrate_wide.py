@@ -12,7 +12,7 @@ from CameraModel import WideCamera
 args = sys.argv
 
 COLS = 6
-ROWS = 7
+ROWS = 8
 
 if len(args) == 2:
     COUNT_MAX = int(args[1])

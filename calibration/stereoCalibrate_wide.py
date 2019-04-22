@@ -9,8 +9,8 @@ import calibrated
 
 args = sys.argv
 
-COLS = 6
-ROWS = 8
+COLS = 8
+ROWS = 6
 
 if len(args) == 2:
     COUNT_MAX = int(args[1])
