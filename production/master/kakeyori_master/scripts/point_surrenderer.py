@@ -47,10 +47,10 @@ class setGoal():
         # to be normalized
         angle = rela_theta + self.world.theta
         r = math.sqrt(rela_x ** 2 + rela_y ** 2)
-        # y = self.world.y + r * math.cos(angle) / 100
-        # x = self.world.x + r * math.sin(angle) / 100
-        x = self.world.x + 0.5
-        y = self.world.y
+        x = self.world.x + r * math.cos(angle) / 100
+        y = self.world.y + r * math.sin(angle) / 100
+        # x = self.world.x + 0.5
+        # y = self.world.y
         print('set goal:', x, y, 'deg:', math.degrees(angle))
         print('world:', self.world.x, self.world.y)
         return x, y, angle

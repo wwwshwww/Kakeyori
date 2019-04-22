@@ -13,12 +13,11 @@ import rospy
 import cv2
 import math
 
-STEREO_DIST = 650 # px dist of both lenz in real cammera system
-MM_PER_PIX = 0.003 # sensor size mm / pixel
+# STEREO_DIST = 650 # px dist of both lenz in real cammera system
+MM_PER_PIX = 0.0048 # sensor size cm / pixel
 
 class arucoFinder():
     def __init__(self):
-        self.isReady = True
         self.aruco = cv2.aruco
         self.ar_dict = self.aruco.getPredefinedDictionary(self.aruco.DICT_6X6_250)
         self.interporation = cv2.INTER_NEAREST
@@ -29,8 +28,13 @@ class arucoFinder():
         self.stereo_mtx = calibrated.getStereoMatrix()
         self.camera1_mtx = self.stereo_mtx['K1']
         self.focal_length = self.camera1_mtx[0,0]
+        self.camera1_trans = self.stereo_mtx['T']
+        self.stereo_length = math.fabs(self.camera1_trans[0,0])
 
         self.br = CvBridge()
+        self.setSubscriber()
+    
+    def setSubscriber(self):
         self.sub_left = message_filters.Subscriber('/left/image_calibrated', Image)
         self.sub_right = message_filters.Subscriber('/right/image_calibrated', Image)
         self.mf = message_filters.ApproximateTimeSynchronizer([self.sub_left, self.sub_right], 100, 10.0)
@@ -56,17 +60,18 @@ class arucoFinder():
 
     def getRelative(self, inter_l, inter_r):
         normalize_angle = math.pi / 2
+        secret = 1.6
         dis = math.sqrt((inter_l[0] - inter_r[0])**2 + (inter_l[1] - inter_r[1])**2)
             # d = (X vec of T) * (a11 of K1) / disparity
-        d = (STEREO_DIST * self.focal_length) / dis
-        r = d * MM_PER_PIX
+        d = (self.stereo_length * self.focal_length) / dis * secret
+        r = d
 
         pw = (inter_l[0] + inter_r[0]) / 2. - self.w / 2.
         ph = (inter_l[1] + inter_r[1]) / 2. - self.h / 2.
 
         # calc relative coordinates X and Y
-        rw = pw * d * (MM_PER_PIX**2)
-        rh = ph * d * (MM_PER_PIX**2)
+        rw = pw * d * MM_PER_PIX
+        rh = ph * d * MM_PER_PIX
 
         # calc relative angle theta1 and theta2
         # temporary, only use theta1 that include angle of width
@@ -84,21 +89,21 @@ class arucoFinder():
         corners_l, corners_r, _, _, _, _ = self.findAruco(img_left, img_right)
 
         if len(corners_l) == 1 and len(corners_r) == 1:
+            self.sub_left.unregister()
+            self.sub_right.unregister()
             inter_l, inter_r = self.getQuadIntersections(corners_l, corners_r)
             rw, _, r, theta1, _ = self.getRelative(inter_l, inter_r)
-            if self.isReady:
-                isArrive = self.client(rw, r, theta1)
-                print(isArrive, rospy.get_time())
+
+            isArrive = self.client(rw, r, theta1)
+            print(isArrive, rospy.get_time())
+            self.setSubscriber()
+            rospy.spin()
             
     def client(self, rw, r, theta):
-        self.isReady = False
-        self.sub_left.unregister()
-        self.sub_right.unregister()
         rospy.wait_for_service('point_surrenderer')
         try:
             point_surrenderer = rospy.ServiceProxy('point_surrenderer', RelativeCoordinates)
             resp = point_surrenderer(r, rw, theta)
-            self.isReady = True
             return resp.isGoal
         except rospy.ServiceException, e:
             print("Service call faild: %s"%e)

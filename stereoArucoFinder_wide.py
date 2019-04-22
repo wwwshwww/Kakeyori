@@ -4,8 +4,8 @@ import math
 from calibration import calibrated
 from coordinate import intersection
 
-STEREO_DIST = 650
-MM_PER_PIX = 0.003
+MM_PER_PIX = 0.0048 # sensor size / camera pixel
+# STEREO_DIST = 1240 # both camera dist mm / pixel
 
 aruco = cv2.aruco
 dictionary = aruco.getPredefinedDictionary(aruco.DICT_6X6_250)
@@ -23,8 +23,12 @@ tmpret, tmpframe = cap1.read()
 h, w = tmpframe.shape[:2]
 
 sk = s_mtx['K1']
-sdis = sk[0,0]
-print(sdis)
+fdis = sk[0,0]
+print(fdis)
+
+st = s_mtx['T']
+stereod = math.fabs(st[0,0])
+print(stereod)
 
 print(maps)
 
@@ -49,27 +53,34 @@ while True:
         cv2.circle(frame2, inter2, 20, (255, 255, 0), -1)
 
         tmp = math.sqrt((inter1[0] - inter2[0]) ** 2 + (inter1[1] - inter2[1]) ** 2)
-        # d = (X vec of T) * (a11 of K1) / disparity
-        z = (STEREO_DIST * sdis) / tmp
-        rz = z * MM_PER_PIX
+        # z = (X vec of T) * (a11 of K1) / disparity
+        z = stereod * fdis / tmp * 1.6
+        rz = z
         print(rz)
 
         px = (inter1[0] + inter2[0]) / 2. - w / 2.
-        px *= -1
         py = (inter1[1] + inter2[1]) / 2. - h / 2.
 
         # calc relative coordinates X and Y
-        rx = px * z * (MM_PER_PIX ** 2)
-        ry = py * z * (MM_PER_PIX ** 2)
+        rx = px * z * MM_PER_PIX
+        ry = py * z * MM_PER_PIX
 
         # calc relative angle θ1 and θ2
         # temporary, only use θ1 that include angle of width
         # these are absolute angle of radian, so like to make to be converted coordinates
-        theta1 = math.atan2(rz, rx)
-        theta2 = math.atan2(rz, ry)
+        theta1 = math.atan2(rz, rx) - math.pi/2
+        theta2 = math.atan2(rz, ry) - math.pi/2
+
+        tmptheta = math.pi
+        tmpx = 2
+        tmpy = 2
+        gx = tmpx + math.sqrt(rx**2+rz**2) * math.cos(theta1 + tmptheta)
+        gy = tmpy + math.sqrt(ry**2+rz**2) * math.sin(theta1 + tmptheta)
+
+        print(gx, gy, math.sqrt(rx**2+rz**2), "!!!!!!!")
 
         # '90' is front
-        print("xθ:", math.degrees(theta1)-90, "\nyθ:", math.degrees(theta2)-90)
+        print("xθ:", math.degrees(theta1), "\nyθ:", math.degrees(theta2))
 
         print("X:", rx, "\nY:", ry)
 
