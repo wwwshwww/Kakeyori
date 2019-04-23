@@ -42,8 +42,8 @@ class arucoFinder():
 
     def convertImgToCv2Both(self, data_left, data_right):
         try:
-            img_left = self.br.imgmsg_to_cv2(data_left, 'passthrough')
-            img_right = self.br.imgmsg_to_cv2(data_right, 'passthrough')
+            img_left = self.br.imgmsg_to_cv2(data_left, 'rgb8')
+            img_right = self.br.imgmsg_to_cv2(data_right, 'rgb8')
         except CvBridgeError, e:
             rospy.logger(e)
         return img_left, img_right
