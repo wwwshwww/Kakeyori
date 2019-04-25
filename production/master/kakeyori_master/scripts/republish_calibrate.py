@@ -38,8 +38,8 @@ class republishCalibrate():
         remaped_left, remaped_right = self.calibrate(img_left, img_right)
 
         try:
-            msg_left = self.br.cv2_to_imgmsg(img_left, 'rgb8')
-            msg_right = self.br.cv2_to_imgmsg(img_right, 'rgb8')
+            msg_left = self.br.cv2_to_imgmsg(remaped_left, 'rgb8')
+            msg_right = self.br.cv2_to_imgmsg(remaped_right, 'rgb8')
         except CvBridgeError, e:
             rospy.logerr(e)
         
