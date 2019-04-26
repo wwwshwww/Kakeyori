@@ -33,6 +33,11 @@ class arucoFinder():
 
         self.br = CvBridge()
         self.setSubscriber()
+
+        self.count = 0
+        self.tmp_rw = 0
+        self.tmp_r = 0
+        self.tmp_th = 0
     
     def setSubscriber(self):
         self.sub_left = message_filters.Subscriber('/left/image_calibrated', Image)
@@ -60,8 +65,9 @@ class arucoFinder():
 
     def getRelative(self, inter_l, inter_r):
         normalize_angle = math.pi / 2
-        secret = 1.6
-        dis = math.sqrt((inter_l[0] - inter_r[0])**2 + (inter_l[1] - inter_r[1])**2)
+        secret = 2.2
+        # dis = math.sqrt((inter_l[0] - inter_r[0])**2 + (inter_l[1] - inter_r[1])**2)
+        dis = math.fabs(inter_l[0] - inter_r[0])
             # d = (X vec of T) * (a11 of K1) / disparity
         d = (self.stereo_length * self.focal_length) / dis * secret
         r = d
@@ -69,9 +75,11 @@ class arucoFinder():
         pw = (inter_l[0] + inter_r[0]) / 2. - self.w / 2.
         ph = (inter_l[1] + inter_r[1]) / 2. - self.h / 2.
 
+        print('pixel:', pw, ph)
+
         # calc relative coordinates X and Y
-        rw = pw * d * MM_PER_PIX
-        rh = ph * d * MM_PER_PIX
+        rw = pw * d * MM_PER_PIX / 5
+        rh = ph * d * MM_PER_PIX / 5
 
         # calc relative angle theta1 and theta2
         # temporary, only use theta1 that include angle of width
@@ -79,7 +87,7 @@ class arucoFinder():
         theta1 = math.atan2(r, rw) - normalize_angle # front is (1/2)*PI : 90 deg
         theta2 = math.atan2(r, rh) - normalize_angle # same
 
-        print(rw, rh, r, math.degrees(theta1))
+        print('rial:', rw, rh, r, math.degrees(theta1))
 
         return rw, rh, r, theta1, theta2
         
@@ -94,10 +102,39 @@ class arucoFinder():
             inter_l, inter_r = self.getQuadIntersections(corners_l, corners_r)
             rw, _, r, theta1, _ = self.getRelative(inter_l, inter_r)
 
-            isArrive = self.client(rw, r, theta1)
-            print(isArrive, rospy.get_time())
+            if self.count == 5:
+                srw = self.tmp_rw / self.count
+                sr = self.tmp_r / self.count
+                sth = self.tmp_th / self.count
+                print('heikin:', srw, sr, sth)
+                isArrive = self.client(srw, sr, sth)
+                
+                print(isArrive, rospy.get_time())
+                self.count = 0
+                self.tmp_r = 0
+                self.tmp_rw = 0
+                self.tmp_th = 0
+
+            elif self.count == 0:
+                self.tmp_r = r
+                self.tmp_rw = rw
+                self.tmp_th = theta1
+                self.count += 1
+            else:
+                if math.fabs(self.tmp_th / self.count - theta1) < 0.1:
+                    self.tmp_r += r
+                    self.tmp_rw += rw
+                    self.tmp_th += theta1
+                    self.count += 1
+                else:
+                    print("faild get available image.")
+
+            print('get:', r, rw, theta1)
+
             self.setSubscriber()
             rospy.spin()
+
+            
             
     def client(self, rw, r, theta):
         rospy.wait_for_service('point_surrenderer')
